@@ -1,11 +1,12 @@
-export default App
+import AppProvider from "./providers/AppProvider.tsx";
+import React from "react";
 
-function App() {
+const App = () => {
     return (
-        <div>
-            <h1>MicroBlog</h1>
-            <button></button>
-            <button></button>
-        </div>
+        <AppProvider>
+            <React.Fragment/>
+        </AppProvider>
     )
 }
+
+export default App
