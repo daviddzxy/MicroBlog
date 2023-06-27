@@ -1,4 +1,4 @@
-import AppProvider from "./providers/AppProvider.tsx";
+import AppProvider from "./AppProvider.tsx";
 
 const App = () => {
     return (

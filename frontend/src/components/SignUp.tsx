@@ -1,6 +1,11 @@
 const SignUp = () => {
     return (
-        <div></div>
+        <div>
+            <label htmlFor="input">Username</label>
+            <input id="input"></input>
+            <label htmlFor="password">Password</label>
+            <input id="password"></input>
+        </div>
     )
 }
 

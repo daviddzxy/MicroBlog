@@ -1,7 +1,7 @@
 import {Provider} from "react-redux";
-import {store} from "../stores/store.ts";
+import {store} from "./store/store.ts";
 import {RouterProvider} from "react-router-dom";
-import router from "../routes/router.tsx";
+import router from "./router.tsx";
 
 const AppProvider = () => {
     return (

@@ -1,6 +1,6 @@
 import {createBrowserRouter} from "react-router-dom";
-import Landing from "../components/Landing.tsx";
-import SignUp from "../components/SignUp.tsx";
+import Landing from "./components/Landing.tsx";
+import SignUp from "./components/SignUp.tsx";
 
 const router = createBrowserRouter([
     {
