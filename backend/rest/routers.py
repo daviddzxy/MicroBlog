@@ -3,10 +3,11 @@ import schemas
 from fastapi import APIRouter
 from fastapi import Depends
 from fastapi import status
-from fastapi import Response
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+
+from crypto import get_password_hash
 from database import SessionLocal
 
 signup_router = APIRouter(prefix="/operations")
@@ -33,5 +34,5 @@ async def signup(
             status_code=status.HTTP_409_CONFLICT, detail=f"User with username {user.user_name} already exists."
         )
 
-    db_session.add(models.User(user_name=user.user_name, password=user.password))
+    db_session.add(models.User(user_name=user.user_name, password=get_password_hash(user.password)))
     db_session.commit()
