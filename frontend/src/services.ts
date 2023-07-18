@@ -1,8 +1,15 @@
 import axios from "axios";
 
-const url = "http://localhost:8000/operations/sign-up"
+const baseUrl = "http://localhost:8000"
+const signUpUrl = "/operations/sign-up"
+const signInUrl = "/operations/sign-in"
+
 export const signUp = async (userName: string, password: string)=> {
-    await axios.post(url, {userName: userName, password: password})
+    await axios.post(baseUrl + signUpUrl, {userName: userName, password: password})
 }
 
-export default {signUp}
+export const signIn = async (userName: string, password: string) => {
+    return axios.post(baseUrl + signInUrl, {username: userName, password: password})
+}
+
+export default {signUp, signIn}
