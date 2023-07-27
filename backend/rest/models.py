@@ -1,11 +1,13 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase
 
-from database import Base
+
+class Base(DeclarativeBase):
+    pass
 
 
 class User(Base):
     __tablename__ = "user"
 
-    id = Column(Integer, primary_key=True, index=True)
-    user_name = Column(String, unique=True, index=True)
-    password = Column(String)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    user_name: Mapped[str] = mapped_column(unique=True, index=True)
+    password: Mapped[str] = mapped_column()
