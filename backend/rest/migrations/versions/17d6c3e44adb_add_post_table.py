@@ -25,7 +25,6 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
         sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_post_id'), 'post', ['id'], unique=False)
     op.alter_column('user', 'user_name', existing_type=sa.VARCHAR(), nullable=False)
     op.alter_column('user', 'password', existing_type=sa.VARCHAR(), nullable=False)
 
@@ -33,5 +32,4 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.alter_column('user', 'password', existing_type=sa.VARCHAR(), nullable=True)
     op.alter_column('user', 'user_name', existing_type=sa.VARCHAR(), nullable=True)
-    op.drop_index(op.f('ix_post_id'), table_name='post')
     op.drop_table('post')
