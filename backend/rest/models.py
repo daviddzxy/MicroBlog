@@ -1,4 +1,5 @@
-from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, relationship
 
 
 class Base(DeclarativeBase):
@@ -11,3 +12,13 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     user_name: Mapped[str] = mapped_column(unique=True, index=True)
     password: Mapped[str] = mapped_column()
+    posts: Mapped[list["Post"]] = relationship(back_populates="post")
+
+
+class Post(Base):
+    __tablename__ = "post"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    content: Mapped[str] = mapped_column()
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    user: Mapped["User"] = relationship(back_populates="user")
