@@ -1,5 +1,7 @@
 from datetime import timedelta
-from typing import TypedDict
+from typing import TypedDict, Annotated
+
+from jose import JWTError
 
 import models
 import schemas
@@ -10,9 +12,10 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 
-from crypto import get_password_hash, verify_password, create_access_token
+from crypto import get_password_hash, verify_password, create_access_token, oauth2_scheme, get_token_data
 from database import SessionLocal
 from env_vars import ACCESS_TOKEN_EXPIRE_TIME
+from exceptions import unauthorized_exception
 
 signup_router = APIRouter(prefix="/operations")
 
@@ -47,7 +50,7 @@ class SignInResponse(TypedDict):
     token_type: str
 
 
-@signup_router.post("/sign-in", status_code=status.HTTP_200_OK)
+@signup_router.post("/sign-in", response_model=schemas.Token, status_code=status.HTTP_200_OK)
 async def signin(
     user: schemas.UserCreate,
     db_session: Session = Depends(get_database_session)
@@ -75,3 +78,33 @@ async def signin(
         data={"sub": user.user_name}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+def get_current_user(token: str, db_session: Session) -> models.User:
+    try:
+        token_data = get_token_data(token)
+    except JWTError:
+        raise unauthorized_exception
+
+    user = None
+    if token_data:
+        result = db_session.execute(
+            select(models.User).where(models.User.user_name == token_data.username)
+        ).first()
+        user = result[0] if result else None
+
+    if token_data is None or user is None:
+        raise unauthorized_exception
+
+    return user
+
+
+@signup_router.post("/publish-post")
+def publish_post(
+    post: schemas.PostBase,
+    token: Annotated[str, Depends(oauth2_scheme)],
+    db_session: Session = Depends(get_database_session)
+):
+    current_user = get_current_user(token, db_session)
+    db_session.add(models.Post(content=post.content, user=current_user))
+    db_session.commit()

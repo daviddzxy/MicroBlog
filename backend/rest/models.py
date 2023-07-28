@@ -12,7 +12,7 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_name: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str] = mapped_column()
-    posts: Mapped[list["Post"]] = relationship(back_populates="post")
+    posts: Mapped[list["Post"]] = relationship(back_populates="user")
 
 
 class Post(Base):
@@ -21,4 +21,4 @@ class Post(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     content: Mapped[str] = mapped_column()
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    user: Mapped["User"] = relationship(back_populates="user")
+    user: Mapped["User"] = relationship(back_populates="posts")

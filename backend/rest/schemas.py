@@ -16,6 +16,18 @@ class User(UserBase):
         orm_mode = True
 
 
+class PostBase(BaseModel):
+    content: str
+
+
+class Post(PostBase):
+    id: int
+    user_id: int
+
+    class Config:
+        orm_mode = True
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str
