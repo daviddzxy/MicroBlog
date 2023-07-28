@@ -14,22 +14,15 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 
 from crypto import get_password_hash, verify_password, create_access_token, oauth2_scheme, get_token_data
-from database import SessionLocal
+from database import get_database_session
 from env_vars import ACCESS_TOKEN_EXPIRE_TIME
 from exceptions import unauthorized_exception
 
-signup_router = APIRouter(prefix="/operations")
+operation_router = APIRouter(prefix="/operations")
+base_router = APIRouter()
 
 
-def get_database_session():
-    db_session = SessionLocal()
-    try:
-        yield db_session
-    finally:
-        db_session.close()
-
-
-@signup_router.post("/sign-up", status_code=status.HTTP_201_CREATED)
+@operation_router.post("/sign-up", status_code=status.HTTP_201_CREATED)
 async def signup(
     user: schemas.UserCreate,
     db_session: Session = Depends(get_database_session)
@@ -51,7 +44,7 @@ class SignInResponse(TypedDict):
     token_type: str
 
 
-@signup_router.post("/sign-in", response_model=schemas.Token, status_code=status.HTTP_200_OK)
+@operation_router.post("/sign-in", response_model=schemas.Token, status_code=status.HTTP_200_OK)
 async def signin(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db_session: Session = Depends(get_database_session)
@@ -60,19 +53,11 @@ async def signin(
         select(models.User).where(models.User.user_name == form_data.username)
     ).first()
     if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise unauthorized_exception
 
     db_user = result[0]
     if not verify_password(form_data.password, db_user.password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise unauthorized_exception
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_TIME)
     access_token = create_access_token(
@@ -100,7 +85,7 @@ def get_current_user(token: str, db_session: Session) -> models.User:
     return user
 
 
-@signup_router.post("/publish-post")
+@operation_router.post("/publish-post", status_code=status.HTTP_201_CREATED)
 def publish_post(
     post: schemas.PostBase,
     token: Annotated[str, Depends(oauth2_scheme)],

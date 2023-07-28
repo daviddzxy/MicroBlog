@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import signup_router
+from routers import operation_router, base_router
 
 app = FastAPI()
 
@@ -15,4 +15,5 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(signup_router)
+app.include_router(operation_router)
+app.include_router(base_router)

@@ -3,6 +3,6 @@ from starlette import status
 
 unauthorized_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
-    detail="Could not validate credentials",
+    detail="Incorrect username or password",
     headers={"WWW-Authenticate": "Bearer"},
 )
