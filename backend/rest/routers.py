@@ -1,6 +1,7 @@
 from datetime import timedelta
 from typing import TypedDict, Annotated
 
+from fastapi.security import OAuth2PasswordRequestForm
 from jose import JWTError
 
 import models
@@ -52,11 +53,11 @@ class SignInResponse(TypedDict):
 
 @signup_router.post("/sign-in", response_model=schemas.Token, status_code=status.HTTP_200_OK)
 async def signin(
-    user: schemas.UserCreate,
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db_session: Session = Depends(get_database_session)
 ) -> SignInResponse:
     result = db_session.execute(
-        select(models.User).where(models.User.user_name == user.user_name)
+        select(models.User).where(models.User.user_name == form_data.username)
     ).first()
     if result is None:
         raise HTTPException(
@@ -66,7 +67,7 @@ async def signin(
         )
 
     db_user = result[0]
-    if not verify_password(user.password, db_user.password):
+    if not verify_password(form_data.password, db_user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
@@ -75,7 +76,7 @@ async def signin(
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_TIME)
     access_token = create_access_token(
-        data={"sub": user.user_name}, expires_delta=access_token_expires
+        data={"sub": form_data.username}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
