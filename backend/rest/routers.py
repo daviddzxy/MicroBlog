@@ -94,3 +94,12 @@ def publish_post(
     current_user = get_current_user(token, db_session)
     db_session.add(models.Post(content=post.content, user=current_user))
     db_session.commit()
+
+
+@base_router.get("/user/{user_id}/posts", response_model=list[schemas.Post], status_code=status.HTTP_200_OK)
+def get_user_posts(user_id: int, db_session: Session = Depends(get_database_session)):
+    result = db_session.execute(
+        select(models.Post).where(models.Post.user_id == user_id)
+    ).scalars().all()
+
+    return result
