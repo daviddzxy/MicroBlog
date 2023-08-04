@@ -1,6 +1,7 @@
 from datetime import timedelta
 from typing import TypedDict, Annotated
 
+import sqlalchemy.exc
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import JWTError
 
@@ -94,6 +95,27 @@ def publish_post(
     current_user = get_current_user(token, db_session)
     db_session.add(models.Post(content=post.content, user=current_user))
     db_session.commit()
+
+
+@operation_router.post("/follow-user", status_code=status.HTTP_201_CREATED)
+def follow_user(
+    user_id: int,
+    token: Annotated[str, Depends(oauth2_scheme)],
+    db_session: Session = Depends(get_database_session)
+):
+    current_user = get_current_user(token, db_session)
+    if current_user.id == user_id:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"User cannot follow himself."
+        )
+
+    try:
+        db_session.add(models.Follow(follower_id=current_user.id, followee_id=user_id))
+        db_session.commit()
+    except sqlalchemy.exc.IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail=f"User is already following user with user id {user_id}."
+        )
 
 
 @base_router.get("/user/{user_id}/posts", response_model=list[schemas.Post], status_code=status.HTTP_200_OK)
