@@ -9,7 +9,7 @@ export const signUp = async (userName: string, password: string)=> {
 }
 
 export const signIn = async (userName: string, password: string) => {
-    return axios.post(baseUrl + signInUrl, {username: userName, password: password})
+    return axios.post(baseUrl + signInUrl, {username: userName, password: password}, {headers: {"content-type": "application/x-www-form-urlencoded"}})
 }
 
 export default {signUp, signIn}
