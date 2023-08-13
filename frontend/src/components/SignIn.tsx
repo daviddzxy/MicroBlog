@@ -1,6 +1,8 @@
 import services from "../services.ts";
 import {AxiosResponse} from "axios";
 import {useForm} from "react-hook-form";
+import {useMutation} from "react-query";
+import axios from "axios";
 
 type FormValues = {
   userName: string;
@@ -8,22 +10,30 @@ type FormValues = {
 }
 
 const SignUp = () => {
-    const { register, handleSubmit } = useForm<FormValues>();
-
-  const submitSignIn = async (data: FormValues) => {
-      const response: AxiosResponse<{access_token: string}> = await services.signIn(data.userName, data.password)
-      localStorage.setItem("access_token", response.data.access_token)
-  }
+  const {register, handleSubmit} = useForm<FormValues>();
+  const signInMutation = useMutation({
+      mutationFn: (data: FormValues) => services.signIn(data.userName, data.password),
+      onSuccess: (data: AxiosResponse<{ access_token: string }>) => localStorage.setItem("access_token", data.data.access_token)
+    }
+  )
 
   return (
     <div>
-      <form onSubmit={handleSubmit(submitSignIn)}>
+      <form onSubmit={handleSubmit(data => {
+        try {
+          signInMutation.mutate(data)
+          console.log("Successful sign in.")
+        } catch (e) {
+          console.log("Sign in failed with error: " + e)
+        }
+      })}>
         <label htmlFor="input">Username</label>
         <input id="input" {...register("userName")}/>
         <label htmlFor="password">Password</label>
         <input id="password" type="password" {...register("password")}/>
         <button type="submit">Sign In</button>
       </form>
+      {signInMutation.isError && axios.isAxiosError(signInMutation.error) ? <div>{signInMutation.error.response?.data.detail}</div> : null}
     </div>
   )
 }

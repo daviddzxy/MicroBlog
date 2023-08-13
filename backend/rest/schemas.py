@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 
 
 class UserBase(BaseModel):
-    user_name: str = Field(alias="username")
+    user_name: str = Field(alias="userName")
 
 
 class UserCreate(UserBase):
