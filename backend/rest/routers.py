@@ -7,11 +7,11 @@ from jose import JWTError
 
 import models
 import schemas
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from fastapi import Depends
 from fastapi import status
 from fastapi import HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, aliased
 from sqlalchemy import select
 
 from crypto import get_password_hash, verify_password, create_access_token, oauth2_scheme, get_token_data
@@ -116,6 +116,54 @@ def follow_user(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail=f"User is already following user with user id {user_id}."
         )
+
+
+@operation_router.get("/followers/posts", status_code=status.HTTP_200_OK)
+def feed(
+    token: Annotated[str, Depends(oauth2_scheme)],
+    db_session: Session = Depends(get_database_session),
+    _id: Annotated[
+        int | None,
+        Query(
+            alias="id",
+            description="The id parameter is used for pagination."
+                        " To retrieve the first page of results omit the parameter."
+                        " To retrieve next page, use the lowest id value from previous page")
+    ] = None,
+    limit: Annotated[
+        int, Query(description="Use limit parameter to set the size of returned page")] = 20,
+) -> list[schemas.PostWithUserDetails]:
+    current_user = get_current_user(token, db_session)
+    user_alias: models.User = aliased(models.User)
+    query = (
+        select(
+            models.Post.id,
+            models.Post.content,
+            models.Post.created_at,
+            models.Post.user_id,
+            models.User.user_name,
+        ).
+        join(models.User, models.User.id == models.Post.user_id).
+        join(models.Follow, models.User.id == models.Follow.followee_id).
+        join(user_alias, user_alias.id == models.Follow.follower_id).
+        where(user_alias.id == current_user.id).order_by(models.Post.id.desc())
+    )
+    if _id:
+        query = query.where(_id > models.Post.id)
+
+    if limit:
+        query = query.limit(limit)
+
+    results = db_session.execute(query).all()
+    return [
+        schemas.PostWithUserDetails(
+            user_name=result.user_name,
+            content=result.content,
+            created_at=result.created_at,
+            user_id=result.user_id,
+            id=result.id
+        ) for result in results
+    ]
 
 
 @base_router.get("/user/{user_id}/posts", response_model=list[schemas.Post], status_code=status.HTTP_200_OK)
