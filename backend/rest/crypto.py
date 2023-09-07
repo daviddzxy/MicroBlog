@@ -6,7 +6,7 @@ from passlib.context import CryptContext
 from env_vars import SECRET_KEY, ALGORITHM
 from schemas import TokenData
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="operations/sign-in")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="sign-in")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

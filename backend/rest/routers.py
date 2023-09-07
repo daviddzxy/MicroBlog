@@ -19,11 +19,10 @@ from database import get_database_session
 from env_vars import ACCESS_TOKEN_EXPIRE_TIME
 from exceptions import unauthorized_exception
 
-operation_router = APIRouter(prefix="/operations")
 base_router = APIRouter()
 
 
-@operation_router.post("/sign-up", status_code=status.HTTP_201_CREATED)
+@base_router.post("/sign-up", status_code=status.HTTP_201_CREATED)
 async def signup(
     user: schemas.UserCreate,
     db_session: Session = Depends(get_database_session)
@@ -45,7 +44,7 @@ class SignInResponse(TypedDict):
     token_type: str
 
 
-@operation_router.post("/sign-in", response_model=schemas.Token, status_code=status.HTTP_200_OK)
+@base_router.post("/sign-in", response_model=schemas.Token, status_code=status.HTTP_200_OK)
 async def signin(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db_session: Session = Depends(get_database_session)
@@ -86,7 +85,7 @@ def get_current_user(token: str, db_session: Session) -> models.User:
     return user
 
 
-@operation_router.post("/publish-post", status_code=status.HTTP_201_CREATED)
+@base_router.post("/post", status_code=status.HTTP_201_CREATED)
 def publish_post(
     post: schemas.PostBase,
     token: Annotated[str, Depends(oauth2_scheme)],
@@ -97,7 +96,7 @@ def publish_post(
     db_session.commit()
 
 
-@operation_router.post("/follow-user", status_code=status.HTTP_201_CREATED)
+@base_router.post("/follow", status_code=status.HTTP_201_CREATED)
 def follow_user(
     user_id: int,
     token: Annotated[str, Depends(oauth2_scheme)],
@@ -118,7 +117,7 @@ def follow_user(
         )
 
 
-@operation_router.get("/followers/posts", status_code=status.HTTP_200_OK)
+@base_router.get("/followers/posts", status_code=status.HTTP_200_OK)
 def feed(
     token: Annotated[str, Depends(oauth2_scheme)],
     db_session: Session = Depends(get_database_session),
