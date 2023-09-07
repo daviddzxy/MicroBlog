@@ -1,5 +1,6 @@
-from sqlalchemy import ForeignKey, UniqueConstraint
+from sqlalchemy import ForeignKey, func, TIMESTAMP
 from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, relationship
+from datetime import datetime
 
 
 class Base(DeclarativeBase):
@@ -13,6 +14,11 @@ class Follow(Base):
     followee_id: Mapped[int] = mapped_column(ForeignKey("user.id"), primary_key=True)
     follower = relationship('User', foreign_keys=[follower_id])
     followee = relationship('User', foreign_keys=[followee_id])
+    created_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True),
+        default=func.now(),
+        server_default=func.now()
+    )
 
 
 class User(Base):
@@ -36,6 +42,11 @@ class User(Base):
         back_populates="followers",
         viewonly=True
     )
+    created_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True),
+        default=func.now(),
+        server_default=func.now()
+    )
 
 
 class Post(Base):
@@ -45,3 +56,8 @@ class Post(Base):
     content: Mapped[str] = mapped_column()
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     user: Mapped["User"] = relationship(back_populates="posts")
+    created_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True),
+        default=func.now(),
+        server_default=func.now()
+    )
