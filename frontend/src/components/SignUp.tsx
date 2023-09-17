@@ -31,7 +31,7 @@ const SignUp = () => {
         <input id="password" type="password" {...register("password")}/>
         <button type="submit">Sign Up</button>
       </form>
-      {signUpMutation.isError && axios.isAxiosError(signUpMutation.error) ? <div>{signUpMutation.error.response?.data.detail}</div> : null}
+      {signUpMutation.isError && axios.isAxiosError(signUpMutation.error) ? <p>{signUpMutation.error.response?.data.detail}</p> : null}
     </div>
   )
 }
