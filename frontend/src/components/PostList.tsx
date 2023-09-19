@@ -1,9 +1,25 @@
-import {useQuery} from "react-query";
+import {useInfiniteQuery} from "react-query";
 import {fetchFollowersPosts} from "../services.ts";
 import axios from "axios";
+import React from "react";
 
 const PostList = () => {
-    const { isLoading, isError, data, error } = useQuery({queryKey: ["posts"], queryFn: fetchFollowersPosts})
+  const {
+    data,
+    error,
+    isLoading,
+    isError,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+    isFetching
+  } = useInfiniteQuery(
+    'posts',
+    ({ pageParam }) => fetchFollowersPosts(pageParam), {
+    getNextPageParam: (lastPage) => {
+      return lastPage.length > 0 ? lastPage[lastPage.length - 1].id : undefined
+    },
+  })
   let content;
 
   switch (true) {
@@ -16,7 +32,26 @@ const PostList = () => {
       }
       break;
     default:
-      content = <div>{data?.map(post => (<div key={post.id}>{post.user_name}: {post.content}</div>))}</div>
+      content = (
+         <React.Fragment>
+        <div>
+          {data?.pages.map((posts) => posts.map((post) => <div key={post.id}>{post.user_name}: {post.content}</div>))}
+        </div>
+        <div>
+          <button
+            onClick={() => fetchNextPage()}
+            disabled={!hasNextPage || isFetchingNextPage}
+          >
+            {isFetchingNextPage
+              ? 'Loading more...'
+              : hasNextPage
+              ? 'Load More'
+              : 'Nothing more to load'}
+          </button>
+        </div>
+        <div>{isFetching && !isFetchingNextPage ? 'Fetching...' : null}</div>
+        </React.Fragment>
+      )
   }
 
   return (

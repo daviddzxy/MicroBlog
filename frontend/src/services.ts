@@ -21,9 +21,11 @@ interface FollowerPost {
     content: string
 }
 
-export const fetchFollowersPosts = async (): Promise<FollowerPost[]> => {
+export const fetchFollowersPosts = async (id: number | null = null, limit= 8): Promise<FollowerPost[]> => {
     const token = localStorage.getItem("accessToken")
-    const response = await axios.get(baseUrl + followersPostsUrl, {headers: {"Authorization": "Bearer " + token}})
+    let params: {limit: number, id?: number} = {limit: limit}
+    params = id ? {...params, id: id} : params
+    const response = await axios.get(baseUrl + followersPostsUrl, {headers: {"Authorization": "Bearer " + token}, params: params})
     return response.data
 }
 
