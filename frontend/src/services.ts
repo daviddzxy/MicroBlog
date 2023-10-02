@@ -21,7 +21,7 @@ interface FollowerPost {
     content: string
 }
 
-export const fetchFollowersPosts = async (id: number | null = null, limit= 8): Promise<FollowerPost[]> => {
+export const fetchFollowersPosts = async (id: number | null = null, limit=8): Promise<FollowerPost[]> => {
     const token = localStorage.getItem("accessToken")
     let params: {limit: number, id?: number} = {limit: limit}
     params = id ? {...params, id: id} : params

@@ -1,7 +1,7 @@
 import {useInfiniteQuery} from "react-query";
 import {fetchFollowersPosts} from "../services.ts";
 import axios from "axios";
-import React from "react";
+import Post from "./Post.tsx";
 
 const PostList = () => {
   const {
@@ -12,16 +12,16 @@ const PostList = () => {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-    isFetching
+    isSuccess
   } = useInfiniteQuery(
     'posts',
-    ({ pageParam }) => fetchFollowersPosts(pageParam), {
-    getNextPageParam: (lastPage) => {
-      return lastPage.length > 0 ? lastPage[lastPage.length - 1].id : undefined
-    },
-  })
-  let content;
+    ({pageParam}) => fetchFollowersPosts(pageParam), {
+      getNextPageParam: (lastPage) => {
+        return lastPage.length > 0 ? lastPage[lastPage.length - 1].id : undefined
+      },
+    })
 
+  let content;
   switch (true) {
     case isLoading:
       content = <p>Loading...</p>;
@@ -31,27 +31,26 @@ const PostList = () => {
         content = <p>{error.response?.data.detail}</p>;
       }
       break;
-    default:
+    case isSuccess:
       content = (
-         <React.Fragment>
-        <div>
-          {data?.pages.map((posts) => posts.map((post) => <div key={post.id}>{post.user_name}: {post.content}</div>))}
+        <div className="flex flex-col space-y-2 overflow-y-auto border-black">
+          {
+            data?.pages.map(
+              (posts) => posts.map((post) =>
+                <Post {...post}/>
+              )
+            )
+          }
+          <div>
+            {hasNextPage ?
+              <button className="border-2 border-black py-2 px-4 rounded-full" onClick={() => fetchNextPage()}
+                      disabled={isFetchingNextPage}>
+                <span className="hover:underline">Load More</span>
+              </button> : null}
+          </div>
         </div>
-        <div>
-          <button
-            onClick={() => fetchNextPage()}
-            disabled={!hasNextPage || isFetchingNextPage}
-          >
-            {isFetchingNextPage
-              ? 'Loading more...'
-              : hasNextPage
-              ? 'Load More'
-              : 'Nothing more to load'}
-          </button>
-        </div>
-        <div>{isFetching && !isFetchingNextPage ? 'Fetching...' : null}</div>
-        </React.Fragment>
       )
+      break;
   }
 
   return (
