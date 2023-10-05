@@ -118,7 +118,7 @@ def follow_user(
 
 
 @base_router.get("/followers/posts", status_code=status.HTTP_200_OK)
-def feed(
+def get_posts_from_followers(
     token: Annotated[str, Depends(oauth2_scheme)],
     db_session: Session = Depends(get_database_session),
     _id: Annotated[
@@ -165,10 +165,48 @@ def feed(
     ]
 
 
-@base_router.get("/user/{user_id}/posts", response_model=list[schemas.Post], status_code=status.HTTP_200_OK)
-def get_user_posts(user_id: int, db_session: Session = Depends(get_database_session)):
-    result = db_session.execute(
-        select(models.Post).where(models.Post.user_id == user_id)
-    ).scalars().all()
+@base_router.get("/user/{user_name}")
+def get_user(user_name: str, db_session: Session = Depends(get_database_session)) -> schemas.User:
+    result = db_session.execute(select(models.User).where(models.User.user_name == user_name)).scalar()
+    if result:
+        user = schemas.User(id=result.id, userName=result.user_name, created_at=result.created_at)
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"User with username {user_name} not found."
+        )
+    return user
 
-    return result
+
+@base_router.get("/user/{user_id}/posts", status_code=status.HTTP_200_OK)
+def get_user_posts(
+    user_name: str,
+    db_session: Session = Depends(get_database_session),
+    _id: Annotated[
+        int | None,
+        Query(
+            alias="id",
+            description="The id parameter is used for pagination."
+                        " To retrieve the first page of results omit the parameter."
+                        " To retrieve next page, use the lowest id value from previous page")
+    ] = None,
+    limit: Annotated[
+        int, Query(description="Use limit parameter to set the size of returned page")] = 20,
+) -> list[schemas.Post]:
+    user_id = db_session.execute(select(models.User.id).where(models.User.user_name == user_name)).scalar()
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"User with username {user_name} not found."
+        )
+
+    posts_query = select(models.Post).where(models.Post.user_id == user_id)
+    if _id:
+        posts_query = posts_query.where(_id > models.Post.id)
+
+    if limit:
+        posts_query = posts_query.limit(limit)
+
+    results = db_session.execute(posts_query).scalars()
+    return [
+        schemas.Post(id=result.id, user_id=user_id, created_at=result.created_at, content=result.content)
+        for result in results
+    ]
