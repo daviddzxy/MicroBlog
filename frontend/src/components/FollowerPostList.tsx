@@ -3,7 +3,7 @@ import {fetchFollowersPosts} from "../services.ts";
 import axios from "axios";
 import Post from "./Post.tsx";
 
-const PostList = () => {
+const FollowerPostList = () => {
   const {
     data,
     error,
@@ -14,12 +14,13 @@ const PostList = () => {
     isFetchingNextPage,
     isSuccess
   } = useInfiniteQuery(
-    'posts',
+    'follower_posts',
     ({pageParam}) => fetchFollowersPosts(pageParam), {
       getNextPageParam: (lastPage) => {
         return lastPage.length > 0 ? lastPage[lastPage.length - 1].id : undefined
       },
-    })
+    }
+  )
 
   let content;
   switch (true) {
@@ -60,4 +61,4 @@ const PostList = () => {
   )
 }
 
-export default PostList
+export default FollowerPostList

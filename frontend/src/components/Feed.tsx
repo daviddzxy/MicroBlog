@@ -1,10 +1,10 @@
-import PostList from "./PostList.tsx";
+import FollowerPostList from "./FollowerPostList.tsx";
 
 const Feed = () => {
   return (
     <div className="grid grid-cols-3">
       <div/>
-      <PostList/>
+      <FollowerPostList/>
       <div/>
     </div>
   )

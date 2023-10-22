@@ -14,3 +14,5 @@
 - Make frontend dockerfile
 - Make startup(build) script, which starts both backend and frontend
 - Make custom auth hook
+- Refactor backend - Return responses with camelCase variable names
+- Refactor frontend - Rename variables in snake_case form to camelCase

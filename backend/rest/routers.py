@@ -177,7 +177,7 @@ def get_user(user_name: str, db_session: Session = Depends(get_database_session)
     return user
 
 
-@base_router.get("/user/{user_id}/posts", status_code=status.HTTP_200_OK)
+@base_router.get("/user/{user_name}/posts", status_code=status.HTTP_200_OK)
 def get_user_posts(
     user_name: str,
     db_session: Session = Depends(get_database_session),
@@ -198,7 +198,7 @@ def get_user_posts(
             status_code=status.HTTP_404_NOT_FOUND, detail=f"User with username {user_name} not found."
         )
 
-    posts_query = select(models.Post).where(models.Post.user_id == user_id)
+    posts_query = select(models.Post).where(models.Post.user_id == user_id).order_by(models.Post.id.desc())
     if _id:
         posts_query = posts_query.where(_id > models.Post.id)
 
