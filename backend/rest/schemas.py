@@ -1,9 +1,17 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
+from pydantic.alias_generators import to_camel
 
 
-class UserBase(BaseModel):
-    user_name: str = Field(alias="userName", min_length=4)
+class Schema(BaseModel):
+    class Config:
+        alias_generator = to_camel
+        from_attributes = True
+        populate_by_name = True
+
+
+class UserBase(Schema):
+    user_name: str = Field(min_length=4)
 
 
 class UserCreate(UserBase):
@@ -14,11 +22,8 @@ class User(UserBase):
     id: int
     created_at: datetime
 
-    class Config:
-        orm_mode = True
 
-
-class PostBase(BaseModel):
+class PostBase(Schema):
     content: str
 
 
@@ -27,17 +32,15 @@ class Post(PostBase):
     user_id: int
     created_at: datetime
 
-    class Config:
-        orm_mode = True
-
 
 class PostWithUserDetails(Post):
     user_name: str
 
 
 class Token(BaseModel):
+    # OAuth's specification requires snake_case form, do not use camelCase alias
     access_token: str
-    token_type: str
+    token_type: str = Field("bearer")
 
 
 class TokenData(BaseModel):

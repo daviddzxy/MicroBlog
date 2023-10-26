@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import TypedDict, Annotated
+from typing import Annotated, TypedDict
 
 import sqlalchemy.exc
 from fastapi.security import OAuth2PasswordRequestForm
@@ -39,16 +39,11 @@ async def signup(
     db_session.commit()
 
 
-class SignInResponse(TypedDict):
-    access_token: str
-    token_type: str
-
-
-@base_router.post("/sign-in", response_model=schemas.Token, status_code=status.HTTP_200_OK)
+@base_router.post("/sign-in", status_code=status.HTTP_200_OK)
 async def signin(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db_session: Session = Depends(get_database_session)
-) -> SignInResponse:
+) -> schemas.Token:
     result = db_session.execute(
         select(models.User).where(models.User.user_name == form_data.username)
     ).first()
@@ -63,7 +58,7 @@ async def signin(
     access_token = create_access_token(
         data={"sub": form_data.username}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return schemas.Token(access_token=access_token)
 
 
 def get_current_user(token: str, db_session: Session) -> models.User:
@@ -96,7 +91,7 @@ def publish_post(
     db_session.commit()
 
 
-@base_router.post("/follow", status_code=status.HTTP_201_CREATED)
+@base_router.post("/follow/{user_id}", status_code=status.HTTP_201_CREATED)
 def follow_user(
     user_id: int,
     token: Annotated[str, Depends(oauth2_scheme)],

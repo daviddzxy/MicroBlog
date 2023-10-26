@@ -5,7 +5,7 @@ import Post from "./Post.tsx";
 import React from "react";
 import UserBio from "./UserBio.tsx";
 
-const UserPostList: React.FC<{user_name: string}> = ({user_name}) => {
+const UserPostList: React.FC<{userName: string}> = ({userName}) => {
   const {
     data,
     error,
@@ -17,7 +17,7 @@ const UserPostList: React.FC<{user_name: string}> = ({user_name}) => {
     isSuccess
   } = useInfiniteQuery(
     'user_posts',
-    ({pageParam}) => fetchUserPosts(user_name, pageParam), {
+    ({pageParam}) => fetchUserPosts(userName, pageParam), {
       getNextPageParam: (lastPage) => {
         return lastPage.length > 0 ? lastPage[lastPage.length - 1].id : undefined
       },
@@ -37,11 +37,11 @@ const UserPostList: React.FC<{user_name: string}> = ({user_name}) => {
     case isSuccess:
       content = (
         <div className="flex flex-col space-y-2 overflow-y-auto border-black">
-          <UserBio userName={user_name}/>
+          <UserBio userName={userName}/>
           {
             data?.pages.map(
               (posts) => posts.map((post) =>
-                <Post id={post.id} content={post.content} created_at={post.created_at} user_name={user_name}/>
+                <Post id={post.id} content={post.content} createdAt={post.createdAt} userName={userName}/>
               )
             )
           }

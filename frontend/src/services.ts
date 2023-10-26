@@ -12,9 +12,9 @@ export const signIn = async (userName: string, password: string) => {
 
 interface FollowerPost {
     id: number,
-    user_id: number,
-    user_name: string,
-    created_at: Date,
+    userId: number,
+    userName: string,
+    createdAt: Date,
     content: string
 }
 
@@ -29,8 +29,8 @@ export const fetchFollowersPosts = async (id: number | null = null, limit=8): Pr
 interface UserPost {
     content: string
     id: number,
-    user_id: number,
-    created_at: Date,
+    userId: number,
+    createdAt: Date,
 }
 
 export const fetchUserPosts = async (userName: string, id: number | null, limit = 8): Promise<UserPost[]> => {
