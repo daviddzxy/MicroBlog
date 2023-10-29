@@ -44,4 +44,24 @@ export const fetchUserPosts = async (userName: string, id: number | null, limit 
     return response.data
 }
 
-export default {signUp, signIn, fetchFollowersPosts}
+interface User {
+    userName: string
+    id: number,
+    createdAt: Date,
+}
+
+export const fetchUser = async (userName: string): Promise<User> => {
+    const token = localStorage.getItem("accessToken")
+    const response = await axios.get(baseUrl + `/user/${userName}`, {
+        headers: {"Authorization": "Bearer " + token}
+    })
+    return response.data
+}
+
+
+export const followUser = async (userName: string) => {
+    const token = localStorage.getItem("accessToken")
+    return await axios.post(baseUrl + `/follow/${userName}`, null,
+      {headers: {"Authorization": "Bearer " + token}}
+    )
+}

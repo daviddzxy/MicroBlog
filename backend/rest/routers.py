@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Annotated, TypedDict
+from typing import Annotated
 
 import sqlalchemy.exc
 from fastapi.security import OAuth2PasswordRequestForm
@@ -91,24 +91,30 @@ def publish_post(
     db_session.commit()
 
 
-@base_router.post("/follow/{user_id}", status_code=status.HTTP_201_CREATED)
+@base_router.post("/follow/{user_name}", status_code=status.HTTP_201_CREATED)
 def follow_user(
-    user_id: int,
+    user_name: str,
     token: Annotated[str, Depends(oauth2_scheme)],
     db_session: Session = Depends(get_database_session)
 ):
     current_user = get_current_user(token, db_session)
-    if current_user.id == user_id:
+    if current_user.user_name == user_name:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"User cannot follow himself."
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="User cannot follow himself."
+        )
+
+    followed_user = db_session.execute(select(models.User).where(models.User.user_name == user_name)).scalar()
+    if not followed_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"User {user_name} does not exist."
         )
 
     try:
-        db_session.add(models.Follow(follower_id=current_user.id, followee_id=user_id))
+        db_session.add(models.Follow(follower_id=current_user.id, followee_id=followed_user.id))
         db_session.commit()
     except sqlalchemy.exc.IntegrityError:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail=f"User is already following user with user id {user_id}."
+            status_code=status.HTTP_409_CONFLICT, detail=f"User is already following user {user_name}."
         )
 
 

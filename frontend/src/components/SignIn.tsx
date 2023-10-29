@@ -1,4 +1,4 @@
-import services from "../services.ts";
+import {signIn} from "../services.ts";
 import {AxiosResponse} from "axios";
 import {useForm} from "react-hook-form";
 import {useMutation} from "react-query";
@@ -14,7 +14,7 @@ const SignUp = () => {
   const navigate = useNavigate();
   const {register, handleSubmit} = useForm<FormValues>();
   const signInMutation = useMutation({
-      mutationFn: (data: FormValues) => services.signIn(data.userName, data.password),
+      mutationFn: (data: FormValues) => signIn(data.userName, data.password),
       onSuccess: (data: AxiosResponse<{
         access_token: string
       }>) => {

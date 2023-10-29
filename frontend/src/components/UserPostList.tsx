@@ -3,7 +3,7 @@ import {fetchUserPosts} from "../services.ts";
 import axios from "axios";
 import Post from "./Post.tsx";
 import React from "react";
-import UserBio from "./UserBio.tsx";
+import UserProfile from "./UserProfile.tsx";
 
 const UserPostList: React.FC<{userName: string}> = ({userName}) => {
   const {
@@ -37,7 +37,7 @@ const UserPostList: React.FC<{userName: string}> = ({userName}) => {
     case isSuccess:
       content = (
         <div className="flex flex-col space-y-2 overflow-y-auto border-black">
-          <UserBio userName={userName}/>
+          <UserProfile userName={userName}/>
           {
             data?.pages.map(
               (posts) => posts.map((post) =>

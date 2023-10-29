@@ -1,4 +1,4 @@
-import services from "../services.ts";
+import {signUp} from "../services.ts";
 import {useForm} from "react-hook-form";
 import {useMutation} from "react-query";
 import axios from "axios";
@@ -11,7 +11,7 @@ type FormValues = {
 const SignUp = () => {
   const {register, handleSubmit} = useForm<FormValues>();
   const signUpMutation = useMutation({
-      mutationFn: (data: FormValues) => services.signUp(data.userName, data.password)
+      mutationFn: (data: FormValues) => signUp(data.userName, data.password)
     }
   )
 
