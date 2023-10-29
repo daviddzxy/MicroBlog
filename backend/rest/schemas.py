@@ -23,6 +23,10 @@ class User(UserBase):
     created_at: datetime
 
 
+class UserWithDetails(User):
+    is_following: bool
+
+
 class PostBase(Schema):
     content: str
 

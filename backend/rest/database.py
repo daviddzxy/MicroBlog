@@ -1,3 +1,4 @@
+import sqlalchemy.exc
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from env_vars import DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME
@@ -12,5 +13,8 @@ def get_database_session():
     db_session = SessionLocal()
     try:
         yield db_session
+    except sqlalchemy.exc.SQLAlchemyError:
+        db_session.rollback()
+        raise
     finally:
         db_session.close()

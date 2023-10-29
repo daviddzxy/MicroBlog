@@ -48,6 +48,7 @@ interface User {
     userName: string
     id: number,
     createdAt: Date,
+    isFollowing: boolean
 }
 
 export const fetchUser = async (userName: string): Promise<User> => {
@@ -63,5 +64,12 @@ export const followUser = async (userName: string) => {
     const token = localStorage.getItem("accessToken")
     return await axios.post(baseUrl + `/follow/${userName}`, null,
       {headers: {"Authorization": "Bearer " + token}}
+    )
+}
+
+export const unfollowUser = async (userName: string) => {
+    const token = localStorage.getItem("accessToken")
+    return await axios.delete(baseUrl + `/follow/${userName}`,
+    {headers: {"Authorization": "Bearer " + token}}
     )
 }

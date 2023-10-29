@@ -12,7 +12,7 @@ from fastapi import Depends
 from fastapi import status
 from fastapi import HTTPException
 from sqlalchemy.orm import Session, aliased
-from sqlalchemy import select
+from sqlalchemy import select, delete
 
 from crypto import get_password_hash, verify_password, create_access_token, oauth2_scheme, get_token_data
 from database import get_database_session
@@ -118,6 +118,32 @@ def follow_user(
         )
 
 
+@base_router.delete("/follow/{user_name}", status_code=status.HTTP_204_NO_CONTENT)
+def unfollow_user(
+    user_name: str,
+    token: Annotated[str, Depends(oauth2_scheme)],
+    db_session: Session = Depends(get_database_session)
+):
+    followed_user = db_session.execute(select(models.User).where(models.User.user_name == user_name)).scalar()
+    if not followed_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"User {user_name} does not exist."
+        )
+
+    current_user = get_current_user(token, db_session)
+    delete_result = db_session.execute(
+        delete(models.Follow)
+        .where(models.Follow.follower_id == current_user.id)
+        .where(models.Follow.followee_id == followed_user.id)
+    )
+
+    db_session.commit()
+    if not delete_result.rowcount:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"User {current_user.user_name} does not follow {user_name}."
+        )
+
+
 @base_router.get("/followers/posts", status_code=status.HTTP_200_OK)
 def get_posts_from_followers(
     token: Annotated[str, Depends(oauth2_scheme)],
@@ -166,15 +192,32 @@ def get_posts_from_followers(
     ]
 
 
-@base_router.get("/user/{user_name}")
-def get_user(user_name: str, db_session: Session = Depends(get_database_session)) -> schemas.User:
-    result = db_session.execute(select(models.User).where(models.User.user_name == user_name)).scalar()
-    if result:
-        user = schemas.User(id=result.id, userName=result.user_name, created_at=result.created_at)
-    else:
+@base_router.get("/user/{user_name}", status_code=status.HTTP_200_OK)
+def get_user(
+    token: Annotated[str, Depends(oauth2_scheme)],
+    user_name: str,
+    db_session: Session = Depends(get_database_session)
+) -> schemas.UserWithDetails:
+    current_user = get_current_user(token, db_session)
+    user = db_session.execute(select(models.User).where(models.User.user_name == user_name)).scalar()
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f"User with username {user_name} not found."
         )
+
+    follow = db_session.execute(
+        select(models.Follow)
+        .where(models.Follow.follower_id == current_user.id)
+        .where(models.Follow.followee_id == user.id)
+    ).scalar()
+
+    user = schemas.UserWithDetails(
+        id=user.id,
+        userName=user.user_name,
+        created_at=user.created_at,
+        is_following=True if follow else False
+    )
+
     return user
 
 
