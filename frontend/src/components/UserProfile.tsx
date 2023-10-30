@@ -68,9 +68,9 @@ const UserProfile: React.FC<{ userName: string }> = ({userName}) => {
   }
 
   return (
-    <div>
+    <React.Fragment>
       {content}
-    </div>
+    </React.Fragment>
   )
 }
 

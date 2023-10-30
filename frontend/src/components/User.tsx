@@ -1,5 +1,6 @@
-import UserPostList from "./UserPostList.tsx";
 import {useParams} from "react-router-dom";
+import UserPosts from "./UserPosts.tsx";
+import UserProfile from "./UserProfile.tsx";
 
 const User = () => {
   const {userName} = useParams();
@@ -8,10 +9,9 @@ const User = () => {
   }
 
   return (
-    <div className="grid grid-cols-3">
-      <div/>
-      <UserPostList userName={userName}/>
-      <div/>
+    <div>
+      <UserProfile userName={userName}/>
+      <UserPosts userName={userName}/>
     </div>
   )
 }

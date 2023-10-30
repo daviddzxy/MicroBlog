@@ -1,9 +1,10 @@
 import {useInfiniteQuery} from "react-query";
-import {fetchFollowersPosts} from "../services.ts";
+import {fetchUserPosts} from "../services.ts";
 import axios from "axios";
 import Post from "./Post.tsx";
+import React from "react";
 
-const FollowerPostList = () => {
+const UserPosts: React.FC<{ userName: string }> = ({userName}) => {
   const {
     data,
     error,
@@ -14,8 +15,8 @@ const FollowerPostList = () => {
     isFetchingNextPage,
     isSuccess
   } = useInfiniteQuery(
-    'follower_posts',
-    ({pageParam}) => fetchFollowersPosts(pageParam), {
+    'user_posts',
+    ({pageParam}) => fetchUserPosts(userName, pageParam), {
       getNextPageParam: (lastPage) => {
         return lastPage.length > 0 ? lastPage[lastPage.length - 1].id : undefined
       },
@@ -38,7 +39,7 @@ const FollowerPostList = () => {
           {
             data?.pages.map(
               (posts) => posts.map((post) =>
-                <Post {...post}/>
+                <Post id={post.id} content={post.content} createdAt={post.createdAt} userName={userName}/>
               )
             )
           }
@@ -55,10 +56,10 @@ const FollowerPostList = () => {
   }
 
   return (
-    <div>
+    <React.Fragment>
       {content}
-    </div>
+    </React.Fragment>
   )
 }
 
-export default FollowerPostList
+export default UserPosts
