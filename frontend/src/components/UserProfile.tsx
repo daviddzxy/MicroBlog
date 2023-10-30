@@ -19,7 +19,9 @@ const UserProfile: React.FC<{ userName: string }> = ({userName}) => {
 
   const followMutation = useMutation({
       mutationFn: (userName: string) => isFollowing ? unfollowUser(userName) : followUser(userName),
-      onSuccess: () => { setIsFollowing((prevIsFollowing) => !prevIsFollowing) }
+      onSuccess: () => {
+        setIsFollowing((prevIsFollowing) => !prevIsFollowing)
+      }
     }
   )
 
@@ -55,8 +57,8 @@ const UserProfile: React.FC<{ userName: string }> = ({userName}) => {
           >
             {
               isFollowing && isHoveringOverFollowButton ? "Unfollow"
-              : isFollowing && !isHoveringOverFollowButton ? "Following"
-              : "Follow"
+                : isFollowing && !isHoveringOverFollowButton ? "Following"
+                  : "Follow"
             }
           </button>
         </div>

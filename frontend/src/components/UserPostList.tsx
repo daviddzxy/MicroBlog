@@ -5,7 +5,7 @@ import Post from "./Post.tsx";
 import React from "react";
 import UserProfile from "./UserProfile.tsx";
 
-const UserPostList: React.FC<{userName: string}> = ({userName}) => {
+const UserPostList: React.FC<{ userName: string }> = ({userName}) => {
   const {
     data,
     error,

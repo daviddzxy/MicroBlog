@@ -28,17 +28,20 @@ const SignUp = () => {
           }>
       <div className="flex flex-col space-y-4">
         <label className="text-start" htmlFor="username">Username</label>
-        <input id="username" className="bg-gray-50 border border-gray-300 rounded-lg w-full p-2.5" {...register("userName")}/>
+        <input id="username"
+               className="bg-gray-50 border border-gray-300 rounded-lg w-full p-2.5" {...register("userName")}/>
       </div>
       <div className="flex flex-col space-y-4">
         <label className="text-start" htmlFor="password">Password</label>
-        <input className="bg-gray-50 border border-gray-300 rounded-lg w-full p-2.5" id="password" type="password" {...register("password")}/></div>
+        <input className="bg-gray-50 border border-gray-300 rounded-lg w-full p-2.5" id="password"
+               type="password" {...register("password")}/></div>
       <div>
         <button className="border-2 border-black py-2 px-4 rounded-full hover:underline" type="submit">
           <span className="hover:underline">Sign up</span>
         </button>
       </div>
-      {signUpMutation.isError && axios.isAxiosError(signUpMutation.error) ? <p className="text-red-600">{signUpMutation.error.response?.data.detail}</p> : null}
+      {signUpMutation.isError && axios.isAxiosError(signUpMutation.error) ?
+        <p className="text-red-600">{signUpMutation.error.response?.data.detail}</p> : null}
     </form>
   )
 }

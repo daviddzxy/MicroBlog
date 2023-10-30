@@ -1,9 +1,9 @@
 import AppProvider from "./AppProvider.tsx";
 
 const App = () => {
-    return (
-        <AppProvider/>
-    )
+  return (
+    <AppProvider/>
+  )
 }
 
 export default App

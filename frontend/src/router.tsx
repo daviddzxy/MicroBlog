@@ -6,26 +6,26 @@ import Feed from "./components/Feed.tsx"
 import User from "./components/User.tsx";
 
 const router = createBrowserRouter([
-    {
-        path: "/",
-        element: <Landing/>,
-    },
-    {
-        path: "/signup",
-        element: <SignUp/>
-    },
-    {
-        path: "/signin",
-        element: <SignIn/>
-    },
-    {
-        path: "/feed",
-        element: <Feed/>
-    },
-    {
-        path: "/user/:userName",
-        element: <User/>
-    }
+  {
+    path: "/",
+    element: <Landing/>,
+  },
+  {
+    path: "/signup",
+    element: <SignUp/>
+  },
+  {
+    path: "/signin",
+    element: <SignIn/>
+  },
+  {
+    path: "/feed",
+    element: <Feed/>
+  },
+  {
+    path: "/user/:userName",
+    element: <User/>
+  }
 ]);
 
 export default router

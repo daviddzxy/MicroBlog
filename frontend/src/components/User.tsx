@@ -1,5 +1,5 @@
 import UserPostList from "./UserPostList.tsx";
-import { useParams } from "react-router-dom";
+import {useParams} from "react-router-dom";
 
 const User = () => {
   const {userName} = useParams();
