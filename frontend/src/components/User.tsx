@@ -1,12 +1,9 @@
-import {useParams} from "react-router-dom";
-import UserPosts from "./UserPosts.tsx";
 import UserProfile from "./UserProfile.tsx";
+import UserPosts from "./UserPosts.tsx";
+import {useOutletContext} from "react-router-dom";
 
 const User = () => {
-  const {userName} = useParams();
-  if (userName === undefined) {
-    return <div>Error</div>
-  }
+  const userName = useOutletContext<string>();
 
   return (
     <div>

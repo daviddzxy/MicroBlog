@@ -23,8 +23,15 @@ class User(UserBase):
     created_at: datetime
 
 
+class UserFollow(UserBase):
+    id: int
+    created_at: datetime
+
+
 class UserWithDetails(User):
     is_following: bool
+    follower_count: int
+    following_count: int
 
 
 class PostBase(Schema):

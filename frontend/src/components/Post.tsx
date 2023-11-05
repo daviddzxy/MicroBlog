@@ -16,7 +16,7 @@ const Post: React.FC<{
 ) => {
   const date = new Date(createdAt)
   return (
-    <article className="flex flex-col justify-center py-2 px-2 divide-y" key={id}>
+    <article className="flex flex-col justify-center py-2 px-2" key={id}>
       <div><Link to={`/user/${userName}`} className="text-lg px-2 hover:underline">{userName}</Link> <span
         className="text-xs">{date.getDay()}. {date.getMonth()}. {date.getFullYear()}</span></div>
       <div>{content}</div>

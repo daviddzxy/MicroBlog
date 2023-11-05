@@ -54,7 +54,9 @@ interface User {
   userName: string
   id: number,
   createdAt: Date,
-  isFollowing: boolean
+  isFollowing: boolean,
+  followerCount: number,
+  followingCount: number
 }
 
 export const fetchUser = async (userName: string): Promise<User> => {
@@ -78,4 +80,32 @@ export const unfollowUser = async (userName: string) => {
   return await axios.delete(baseUrl + `/follow/${userName}`,
     {headers: {"Authorization": "Bearer " + token}}
   )
+}
+
+interface Follow {
+  userName: string,
+  id: number,
+  createdAt: Date
+}
+
+export const fetchFollowers = async (userName: string, id: number | null, limit = 8): Promise<Follow[]> => {
+  const token = localStorage.getItem("accessToken")
+  let params: { limit: number, id?: number } = {limit: limit}
+  params = id ? {...params, id: id} : params
+  const response = await axios.get(baseUrl + `/user/${userName}/followers`, {
+    headers: {"Authorization": "Bearer " + token},
+    params: params
+  })
+  return response.data
+}
+
+export const fetchFollowing = async (userName: string, id: number | null, limit = 8): Promise<Follow[]> => {
+  const token = localStorage.getItem("accessToken")
+  let params: { limit: number, id?: number } = {limit: limit}
+  params = id ? {...params, id: id} : params
+  const response = await axios.get(baseUrl + `/user/${userName}/following`, {
+    headers: {"Authorization": "Bearer " + token},
+    params: params
+  })
+  return response.data
 }

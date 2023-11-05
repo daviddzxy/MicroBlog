@@ -12,7 +12,7 @@ from fastapi import Depends
 from fastapi import status
 from fastapi import HTTPException
 from sqlalchemy.orm import Session, aliased
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, func
 
 from crypto import get_password_hash, verify_password, create_access_token, oauth2_scheme, get_token_data
 from database import get_database_session
@@ -211,11 +211,16 @@ def get_user(
         .where(models.Follow.followee_id == user.id)
     ).scalar()
 
+    followers_count = db_session.execute(select(func.count()).where(models.Follow.followee_id == user.id)).scalar()
+    following_count = db_session.execute(select(func.count()).where(models.Follow.follower_id == user.id)).scalar()
+
     user = schemas.UserWithDetails(
         id=user.id,
         userName=user.user_name,
         created_at=user.created_at,
-        is_following=True if follow else False
+        is_following=True if follow else False,
+        follower_count=followers_count,
+        following_count=following_count
     )
 
     return user
@@ -253,4 +258,82 @@ def get_user_posts(
     return [
         schemas.Post(id=result.id, user_id=user_id, created_at=result.created_at, content=result.content)
         for result in results
+    ]
+
+
+@base_router.get("/user/{user_name}/following", status_code=status.HTTP_200_OK)
+def get_user_following(
+    user_name: str,
+    db_session: Session = Depends(get_database_session),
+    _id: Annotated[
+        int | None,
+        Query(
+            alias="id",
+            description="The id parameter is used for pagination."
+                        " To retrieve the first page of results omit the parameter."
+                        " To retrieve next page, use the lowest id value from previous page")
+    ] = None,
+    limit: Annotated[int, Query(description="Use limit parameter to set the size of returned page")] = 20
+):
+    user_id = db_session.execute(select(models.User.id).where(models.User.user_name == user_name)).scalar()
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"User with username {user_name} not found."
+        )
+
+    query = (
+        select(models.User.user_name, models.User.id, models.Follow.created_at)
+        .join(models.Follow, models.User.id == models.Follow.followee_id)
+        .where(models.Follow.follower_id == user_id)
+        .order_by(models.User.id)
+    )
+
+    if _id:
+        query = query.where(_id > models.User.id)
+
+    if limit:
+        query = query.limit(limit)
+
+    results = db_session.execute(query).all()
+    return [
+        schemas.UserFollow(user_name=result.user_name, id=result.id, created_at=result.created_at) for result in results
+    ]
+
+
+@base_router.get("/user/{user_name}/followers", status_code=status.HTTP_200_OK)
+def get_user_followers(
+    user_name: str,
+    db_session: Session = Depends(get_database_session),
+    _id: Annotated[
+        int | None,
+        Query(
+            alias="id",
+            description="The id parameter is used for pagination."
+                        " To retrieve the first page of results omit the parameter."
+                        " To retrieve next page, use the lowest id value from previous page")
+    ] = None,
+    limit: Annotated[int, Query(description="Use limit parameter to set the size of returned page")] = 20
+):
+    user_id = db_session.execute(select(models.User.id).where(models.User.user_name == user_name)).scalar()
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"User with username {user_name} not found."
+        )
+
+    query = (
+        select(models.User.user_name, models.User.id, models.Follow.created_at)
+        .join(models.Follow, models.User.id == models.Follow.follower_id)
+        .where(models.Follow.followee_id == user_id)
+        .order_by(models.User.id)
+    )
+
+    if _id:
+        query = query.where(_id > models.User.id)
+
+    if limit:
+        query = query.limit(limit)
+
+    results = db_session.execute(query).all()
+    return [
+        schemas.UserFollow(user_name=result.user_name, id=result.id, created_at=result.created_at) for result in results
     ]

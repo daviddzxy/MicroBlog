@@ -34,7 +34,7 @@ const Feed = () => {
       break;
     case isSuccess:
       content = (
-        <div className="flex flex-col space-y-2 overflow-y-auto border-black">
+        <div className="flex flex-col space-y-2 overflow-y-auto border-black divide-y">
           {
             data?.pages.map(
               (posts) => posts.map((post) =>
@@ -42,12 +42,13 @@ const Feed = () => {
               )
             )
           }
-          <div>
+          <div className="py-2">
             {hasNextPage ?
               <button className="border-2 border-black py-2 px-4 rounded-full" onClick={() => fetchNextPage()}
                       disabled={isFetchingNextPage}>
                 <span className="hover:underline">Load More</span>
-              </button> : null}
+              </button> : null
+            }
           </div>
         </div>
       )

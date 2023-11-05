@@ -1,10 +1,13 @@
-import {useInfiniteQuery} from "react-query";
-import {fetchUserPosts} from "../services.ts";
-import axios from "axios";
-import Post from "./Post.tsx";
 import React from "react";
+import {useInfiniteQuery} from "react-query";
+import {fetchFollowers} from "../services.ts";
+import {Link, useOutletContext} from "react-router-dom";
+import axios from "axios";
+import Follow from "./Follow.tsx";
 
-const UserPosts: React.FC<{ userName: string }> = ({userName}) => {
+const Followers = () => {
+  const userName = useOutletContext<string>();
+
   const {
     data,
     error,
@@ -15,13 +18,14 @@ const UserPosts: React.FC<{ userName: string }> = ({userName}) => {
     isFetchingNextPage,
     isSuccess
   } = useInfiniteQuery(
-    'user_posts',
-    ({pageParam}) => fetchUserPosts(userName, pageParam), {
+    ["user", userName, "followers"],
+    ({pageParam}) => fetchFollowers(userName, pageParam), {
       getNextPageParam: (lastPage) => {
         return lastPage.length > 0 ? lastPage[lastPage.length - 1].id : undefined
       },
     }
   )
+
 
   let content;
   switch (true) {
@@ -36,10 +40,11 @@ const UserPosts: React.FC<{ userName: string }> = ({userName}) => {
     case isSuccess:
       content = (
         <div className="flex flex-col space-y-2 overflow-y-auto border-black divide-y">
+          <div className="text-3xl">Followers of <Link className="hover:underline" to={`/user/${userName}`}>{userName}</Link></div>
           {
             data?.pages.map(
-              (posts) => posts.map((post) =>
-                <Post id={post.id} content={post.content} createdAt={post.createdAt} userName={userName}/>
+              (posts) => posts.map((follow) =>
+                <Follow {...follow}/>
               )
             )
           }
@@ -48,7 +53,8 @@ const UserPosts: React.FC<{ userName: string }> = ({userName}) => {
               <button className="border-2 border-black py-2 px-4 rounded-full" onClick={() => fetchNextPage()}
                       disabled={isFetchingNextPage}>
                 <span className="hover:underline">Load More</span>
-              </button> : null}
+              </button> : null
+            }
           </div>
         </div>
       )
@@ -62,4 +68,4 @@ const UserPosts: React.FC<{ userName: string }> = ({userName}) => {
   )
 }
 
-export default UserPosts
+export default Followers
