@@ -8,6 +8,7 @@ import Feed from "./components/Feed.tsx";
 import Followers from "./components/Followers.tsx";
 import User from "./components/User.tsx";
 import Following from "./components/Following.tsx";
+import SideBar from "./components/SideBar.tsx";
 
 const router = createBrowserRouter([
   {
@@ -24,11 +25,11 @@ const router = createBrowserRouter([
   },
   {
     path: "feed",
-    element: <BaseLayout content={<Feed/>}/>
+    element: <BaseLayout content={<Feed/>} sideBar={<SideBar/>}/>
   },
   {
     path: "user/:userName",
-    element: <BaseLayout content={<UserRoot/>}/>,
+    element: <BaseLayout content={<UserRoot/>} sideBar={<SideBar/>}/>,
     children: [
       {
         path: "",
