@@ -109,3 +109,14 @@ export const fetchFollowing = async (userName: string, id: number | null, limit 
   })
   return response.data
 }
+
+export const post = async (content: string) => {
+  const token = localStorage.getItem("accessToken")
+  return await axios.post(baseUrl + "/post", {
+      content: content
+    },
+    {
+      headers: {"Authorization": "Bearer " + token}
+    }
+  )
+}

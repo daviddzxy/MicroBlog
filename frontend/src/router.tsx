@@ -9,6 +9,7 @@ import Followers from "./components/Followers.tsx";
 import User from "./components/User.tsx";
 import Following from "./components/Following.tsx";
 import SideBar from "./components/SideBar.tsx";
+import Post from "./components/Post.tsx";
 
 const router = createBrowserRouter([
   {
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
   {
     path: "feed",
     element: <BaseLayout content={<Feed/>} sideBar={<SideBar/>}/>
+  },
+    {
+    path: "post",
+    element: <BaseLayout content={<Post/>} sideBar={<SideBar/>}/>
   },
   {
     path: "user/:userName",

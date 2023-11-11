@@ -1,10 +1,10 @@
 import {useInfiniteQuery} from "react-query";
-import {fetchUserPosts} from "../services.ts";
+import {fetchFollowersPosts} from "../services.ts";
 import axios from "axios";
 import UserPost from "./UserPost.tsx";
 import React from "react";
 
-const UserPosts: React.FC<{ userName: string }> = ({userName}) => {
+const FeedPosts = () => {
   const {
     data,
     error,
@@ -15,8 +15,8 @@ const UserPosts: React.FC<{ userName: string }> = ({userName}) => {
     isFetchingNextPage,
     isSuccess
   } = useInfiniteQuery(
-    'user_posts',
-    ({pageParam}) => fetchUserPosts(userName, pageParam), {
+    'follower_posts',
+    ({pageParam}) => fetchFollowersPosts(pageParam), {
       getNextPageParam: (lastPage) => {
         return lastPage.length > 0 ? lastPage[lastPage.length - 1].id : undefined
       },
@@ -39,7 +39,7 @@ const UserPosts: React.FC<{ userName: string }> = ({userName}) => {
           {
             data?.pages.map(
               (posts) => posts.map((post) =>
-                <UserPost id={post.id} content={post.content} createdAt={post.createdAt} userName={userName}/>
+                <UserPost {...post}/>
               )
             )
           }
@@ -48,7 +48,8 @@ const UserPosts: React.FC<{ userName: string }> = ({userName}) => {
               <button className="border-2 border-black py-2 px-4 rounded-full" onClick={() => fetchNextPage()}
                       disabled={isFetchingNextPage}>
                 <span className="hover:underline">Load More</span>
-              </button> : null}
+              </button> : null
+            }
           </div>
         </div>
       )
@@ -62,4 +63,4 @@ const UserPosts: React.FC<{ userName: string }> = ({userName}) => {
   )
 }
 
-export default UserPosts
+export default FeedPosts
