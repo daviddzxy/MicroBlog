@@ -4,6 +4,7 @@ import {useForm} from "react-hook-form";
 import {useMutation} from "react-query";
 import axios from "axios";
 import {useNavigate} from 'react-router-dom';
+import {useUser} from "../features/User.tsx";
 
 type FormValues = {
   userName: string;
@@ -12,14 +13,16 @@ type FormValues = {
 
 const SignUp = () => {
   const navigate = useNavigate();
+  const {setUserName} = useUser()
   const {register, handleSubmit} = useForm<FormValues>();
   const signInMutation = useMutation({
-      mutationFn: (data: FormValues) => signIn(data.userName, data.password),
-      onSuccess: (data: AxiosResponse<{
+      mutationFn: (form: FormValues) => signIn(form.userName, form.password),
+      onSuccess: (response: AxiosResponse<{
         access_token: string
-      }>) => {
-        localStorage.setItem("accessToken", data.data.access_token);
+      }>, form: FormValues) => {
+        localStorage.setItem("accessToken", response.data.access_token);
         navigate("/feed")
+        setUserName(form.userName)
       }
     }
   )
