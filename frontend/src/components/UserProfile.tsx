@@ -53,7 +53,12 @@ const UserProfile: React.FC<{ userName: string }> = ({userName}) => {
           <span className="px-2"><Link className="hover:underline" to={`/user/${userName}/followers`}>{data?.followerCount} Followers</Link></span>
           <span className="px-2"><Link className="hover:underline" to={`/user/${userName}/following`}>{data?.followingCount} Following</Link></span>
           <button
-            className="border-2 border-black py-1 px-1 rounded-full hover:underline hover:text-red-600"
+            className={
+              isFollowing ?
+                "border-2 border-black py-1 px-1 rounded-full hover:underline"
+                :
+                "border-2 border-black py-1 px-1 rounded-full hover:underline hover:text-black"
+            }
             onMouseEnter={() => setIsHoveringOverFollowButton(true)}
             onMouseLeave={() => setIsHoveringOverFollowButton(false)}
             onClick={() => followMutation.mutate(userName)}
