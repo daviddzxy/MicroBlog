@@ -1,10 +1,10 @@
-import React, {useEffect, useState} from "react";
-import {useMutation, useQuery} from "react-query";
-import {fetchUser, followUser, unfollowUser} from "../services.ts";
+import React, { useEffect, useState } from "react";
+import { useMutation, useQuery } from "react-query";
+import { fetchUser, followUser, unfollowUser } from "../services.ts";
 import axios from "axios";
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 
-const UserProfile: React.FC<{ userName: string }> = ({userName}) => {
+const UserProfile: React.FC<{ userName: string }> = ({ userName }) => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [isHoveringOverFollowButton, setIsHoveringOverFollowButton] = useState(false);
   const {
@@ -14,7 +14,7 @@ const UserProfile: React.FC<{ userName: string }> = ({userName}) => {
     isError,
     isSuccess
   } = useQuery(
-    ['user', userName],
+    ["user", userName],
     () => fetchUser(userName)
   )
 

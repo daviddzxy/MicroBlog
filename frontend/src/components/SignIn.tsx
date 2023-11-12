@@ -1,9 +1,9 @@
-import {signIn} from "../services.ts";
-import {AxiosResponse} from "axios";
-import {useForm} from "react-hook-form";
-import {useMutation} from "react-query";
+import { signIn } from "../services.ts";
+import { AxiosResponse } from "axios";
+import { useForm } from "react-hook-form";
+import { useMutation } from "react-query";
 import axios from "axios";
-import {useNavigate} from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 type FormValues = {
   userName: string;
@@ -12,7 +12,7 @@ type FormValues = {
 
 const SignUp = () => {
   const navigate = useNavigate();
-  const {register, handleSubmit} = useForm<FormValues>();
+  const { register, handleSubmit } = useForm<FormValues>();
   const signInMutation = useMutation({
       mutationFn: (form: FormValues) => signIn(form.userName, form.password),
       onSuccess: (response: AxiosResponse<{

@@ -11,6 +11,8 @@ module.exports = {
   rules: {
     'react-refresh/only-export-components': 'warn',
     "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": "warn"
+    "react-hooks/exhaustive-deps": "warn",
+    "quotes": ["error", "double"],
+    "object-curly-spacing": ["error", "always"]
   },
 }

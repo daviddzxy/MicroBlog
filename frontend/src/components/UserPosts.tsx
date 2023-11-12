@@ -1,10 +1,10 @@
-import {useInfiniteQuery} from "react-query";
-import {fetchUserPosts} from "../services.ts";
+import { useInfiniteQuery } from "react-query";
+import { fetchUserPosts } from "../services.ts";
 import axios from "axios";
 import UserPost from "./UserPost.tsx";
 import React from "react";
 
-const UserPosts: React.FC<{ userName: string }> = ({userName}) => {
+const UserPosts: React.FC<{ userName: string }> = ({ userName }) => {
   const {
     data,
     error,
@@ -15,8 +15,8 @@ const UserPosts: React.FC<{ userName: string }> = ({userName}) => {
     isFetchingNextPage,
     isSuccess
   } = useInfiniteQuery(
-    'user_posts',
-    ({pageParam}) => fetchUserPosts(userName, pageParam), {
+    "user_posts",
+    ({ pageParam }) => fetchUserPosts(userName, pageParam), {
       getNextPageParam: (lastPage) => {
         return lastPage.length > 0 ? lastPage[lastPage.length - 1].id : undefined
       },

@@ -1,7 +1,7 @@
 import React from "react";
-import {useInfiniteQuery} from "react-query";
-import {fetchFollowers} from "../services.ts";
-import {Link, useOutletContext} from "react-router-dom";
+import { useInfiniteQuery } from "react-query";
+import { fetchFollowers } from "../services.ts";
+import { Link, useOutletContext } from "react-router-dom";
 import axios from "axios";
 import Follow from "./Follow.tsx";
 
@@ -19,7 +19,7 @@ const Followers = () => {
     isSuccess
   } = useInfiniteQuery(
     ["user", userName, "followers"],
-    ({pageParam}) => fetchFollowers(userName, pageParam), {
+    ({ pageParam }) => fetchFollowers(userName, pageParam), {
       getNextPageParam: (lastPage) => {
         return lastPage.length > 0 ? lastPage[lastPage.length - 1].id : undefined
       },

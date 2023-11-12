@@ -1,5 +1,5 @@
-import {useInfiniteQuery} from "react-query";
-import {fetchFollowersPosts} from "../services.ts";
+import { useInfiniteQuery } from "react-query";
+import { fetchFollowersPosts } from "../services.ts";
 import axios from "axios";
 import UserPost from "./UserPost.tsx";
 import React from "react";
@@ -15,8 +15,8 @@ const FeedPosts = () => {
     isFetchingNextPage,
     isSuccess
   } = useInfiniteQuery(
-    'follower_posts',
-    ({pageParam}) => fetchFollowersPosts(pageParam), {
+    "follower_posts",
+    ({ pageParam }) => fetchFollowersPosts(pageParam), {
       getNextPageParam: (lastPage) => {
         return lastPage.length > 0 ? lastPage[lastPage.length - 1].id : undefined
       },

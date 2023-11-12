@@ -1,4 +1,4 @@
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const linkClassName = "border-2 border-black hover:underline w-1/12 py-2 rounded-full"
 
