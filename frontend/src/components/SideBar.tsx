@@ -1,7 +1,6 @@
 import {Link} from "react-router-dom";
-import {useUser} from "../features/User.tsx";
 const SideBar = () => {
-  const {userName} = useUser()
+  const userName = localStorage.getItem("userName")
   return (
     <div className="flex flex-col text-2xl items-center py-4">
       <h1>MicroBlog</h1>

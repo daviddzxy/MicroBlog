@@ -1,5 +1,4 @@
 ## Functional Backlog
-- Implement user profile page (backend&frontend)
 - Implement user search feature (backend&frontend)
 - Implement comment post feature (backend&frontend)
 - Implement form validation (frontend)
