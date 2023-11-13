@@ -12,12 +12,10 @@ class Follow(Base):
 
     follower_id: Mapped[int] = mapped_column(ForeignKey("user.id"), primary_key=True)
     followee_id: Mapped[int] = mapped_column(ForeignKey("user.id"), primary_key=True)
-    follower: Mapped["User"] = relationship('User', foreign_keys=[follower_id])
-    followee: Mapped["User"] = relationship('User', foreign_keys=[followee_id])
+    follower: Mapped["User"] = relationship("User", foreign_keys=[follower_id])
+    followee: Mapped["User"] = relationship("User", foreign_keys=[followee_id])
     created_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP(timezone=True),
-        default=func.now(),
-        server_default=func.now()
+        TIMESTAMP(timezone=True), default=func.now(), server_default=func.now()
     )
 
 
@@ -33,19 +31,17 @@ class User(Base):
         primaryjoin=id == Follow.follower_id,
         secondaryjoin=id == Follow.followee_id,
         back_populates="following",
-        viewonly=True
+        viewonly=True,
     )
     followers: Mapped[list["User"]] = relationship(
         secondary="follow",
         primaryjoin=id == Follow.followee_id,
         secondaryjoin=id == Follow.follower_id,
         back_populates="followers",
-        viewonly=True
+        viewonly=True,
     )
     created_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP(timezone=True),
-        default=func.now(),
-        server_default=func.now()
+        TIMESTAMP(timezone=True), default=func.now(), server_default=func.now()
     )
 
 
@@ -57,7 +53,5 @@ class Post(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     user: Mapped["User"] = relationship(back_populates="posts")
     created_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP(timezone=True),
-        default=func.now(),
-        server_default=func.now()
+        TIMESTAMP(timezone=True), default=func.now(), server_default=func.now()
     )

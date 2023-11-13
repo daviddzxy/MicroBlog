@@ -14,7 +14,13 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session, aliased
 from sqlalchemy import select, delete, func
 
-from crypto import get_password_hash, verify_password, create_access_token, oauth2_scheme, get_token_data
+from crypto import (
+    get_password_hash,
+    verify_password,
+    create_access_token,
+    oauth2_scheme,
+    get_token_data,
+)
 from database import get_database_session
 from env_vars import ACCESS_TOKEN_EXPIRE_TIME
 from exceptions import unauthorized_exception
@@ -24,25 +30,27 @@ base_router = APIRouter()
 
 @base_router.post("/sign-up", status_code=status.HTTP_201_CREATED)
 async def signup(
-    user: schemas.UserCreate,
-    db_session: Session = Depends(get_database_session)
+    user: schemas.UserCreate, db_session: Session = Depends(get_database_session)
 ):
     existing_user_name = db_session.execute(
         select(models.User.user_name).where(models.User.user_name == user.user_name)
     ).scalar()
     if existing_user_name:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail=f"User with username {user.user_name} already exists."
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"User with username {user.user_name} already exists.",
         )
 
-    db_session.add(models.User(user_name=user.user_name, password=get_password_hash(user.password)))
+    db_session.add(
+        models.User(user_name=user.user_name, password=get_password_hash(user.password))
+    )
     db_session.commit()
 
 
 @base_router.post("/sign-in", status_code=status.HTTP_200_OK)
 async def signin(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    db_session: Session = Depends(get_database_session)
+    db_session: Session = Depends(get_database_session),
 ) -> schemas.Token:
     result = db_session.execute(
         select(models.User).where(models.User.user_name == form_data.username)
@@ -84,7 +92,7 @@ def get_current_user(token: str, db_session: Session) -> models.User:
 def publish_post(
     post: schemas.PostBase,
     token: Annotated[str, Depends(oauth2_scheme)],
-    db_session: Session = Depends(get_database_session)
+    db_session: Session = Depends(get_database_session),
 ):
     current_user = get_current_user(token, db_session)
     db_session.add(models.Post(content=post.content, user=current_user))
@@ -95,26 +103,33 @@ def publish_post(
 def follow_user(
     user_name: str,
     token: Annotated[str, Depends(oauth2_scheme)],
-    db_session: Session = Depends(get_database_session)
+    db_session: Session = Depends(get_database_session),
 ):
     current_user = get_current_user(token, db_session)
     if current_user.user_name == user_name:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="User cannot follow himself."
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="User cannot follow himself.",
         )
 
-    followed_user = db_session.execute(select(models.User).where(models.User.user_name == user_name)).scalar()
+    followed_user = db_session.execute(
+        select(models.User).where(models.User.user_name == user_name)
+    ).scalar()
     if not followed_user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"User {user_name} does not exist."
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User {user_name} does not exist.",
         )
 
     try:
-        db_session.add(models.Follow(follower_id=current_user.id, followee_id=followed_user.id))
+        db_session.add(
+            models.Follow(follower_id=current_user.id, followee_id=followed_user.id)
+        )
         db_session.commit()
     except sqlalchemy.exc.IntegrityError:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail=f"User is already following user {user_name}."
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"User is already following user {user_name}.",
         )
 
 
@@ -122,12 +137,15 @@ def follow_user(
 def unfollow_user(
     user_name: str,
     token: Annotated[str, Depends(oauth2_scheme)],
-    db_session: Session = Depends(get_database_session)
+    db_session: Session = Depends(get_database_session),
 ):
-    followed_user = db_session.execute(select(models.User).where(models.User.user_name == user_name)).scalar()
+    followed_user = db_session.execute(
+        select(models.User).where(models.User.user_name == user_name)
+    ).scalar()
     if not followed_user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"User {user_name} does not exist."
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User {user_name} does not exist.",
         )
 
     current_user = get_current_user(token, db_session)
@@ -140,7 +158,8 @@ def unfollow_user(
     db_session.commit()
     if not delete_result.rowcount:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"User {current_user.user_name} does not follow {user_name}."
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User {current_user.user_name} does not follow {user_name}.",
         )
 
 
@@ -153,11 +172,13 @@ def get_posts_from_followers(
         Query(
             alias="id",
             description="The id parameter is used for pagination."
-                        " To retrieve the first page of results omit the parameter."
-                        " To retrieve next page, use the lowest id value from previous page")
+            " To retrieve the first page of results omit the parameter."
+            " To retrieve next page, use the lowest id value from previous page",
+        ),
     ] = None,
     limit: Annotated[
-        int, Query(description="Use limit parameter to set the size of returned page")] = 20,
+        int, Query(description="Use limit parameter to set the size of returned page")
+    ] = 20,
 ) -> list[schemas.PostWithUserDetails]:
     current_user = get_current_user(token, db_session)
     user_alias: models.User = aliased(models.User)
@@ -168,11 +189,12 @@ def get_posts_from_followers(
             models.Post.created_at,
             models.Post.user_id,
             models.User.user_name,
-        ).
-        join(models.User, models.User.id == models.Post.user_id).
-        join(models.Follow, models.User.id == models.Follow.followee_id).
-        join(user_alias, user_alias.id == models.Follow.follower_id).
-        where(user_alias.id == current_user.id).order_by(models.Post.id.desc())
+        )
+        .join(models.User, models.User.id == models.Post.user_id)
+        .join(models.Follow, models.User.id == models.Follow.followee_id)
+        .join(user_alias, user_alias.id == models.Follow.follower_id)
+        .where(user_alias.id == current_user.id)
+        .order_by(models.Post.id.desc())
     )
     if _id:
         query = query.where(_id > models.Post.id)
@@ -187,8 +209,9 @@ def get_posts_from_followers(
             content=result.content,
             created_at=result.created_at,
             user_id=result.user_id,
-            id=result.id
-        ) for result in results
+            id=result.id,
+        )
+        for result in results
     ]
 
 
@@ -196,13 +219,16 @@ def get_posts_from_followers(
 def get_user(
     token: Annotated[str, Depends(oauth2_scheme)],
     user_name: str,
-    db_session: Session = Depends(get_database_session)
+    db_session: Session = Depends(get_database_session),
 ) -> schemas.UserWithDetails:
     current_user = get_current_user(token, db_session)
-    user = db_session.execute(select(models.User).where(models.User.user_name == user_name)).scalar()
+    user = db_session.execute(
+        select(models.User).where(models.User.user_name == user_name)
+    ).scalar()
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"User with username {user_name} not found."
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with username {user_name} not found.",
         )
 
     follow = db_session.execute(
@@ -211,8 +237,12 @@ def get_user(
         .where(models.Follow.followee_id == user.id)
     ).scalar()
 
-    followers_count = db_session.execute(select(func.count()).where(models.Follow.followee_id == user.id)).scalar()
-    following_count = db_session.execute(select(func.count()).where(models.Follow.follower_id == user.id)).scalar()
+    followers_count = db_session.execute(
+        select(func.count()).where(models.Follow.followee_id == user.id)
+    ).scalar()
+    following_count = db_session.execute(
+        select(func.count()).where(models.Follow.follower_id == user.id)
+    ).scalar()
 
     user = schemas.UserWithDetails(
         id=user.id,
@@ -220,7 +250,7 @@ def get_user(
         created_at=user.created_at,
         is_following=True if follow else False,
         follower_count=followers_count,
-        following_count=following_count
+        following_count=following_count,
     )
 
     return user
@@ -235,19 +265,28 @@ def get_user_posts(
         Query(
             alias="id",
             description="The id parameter is used for pagination."
-                        " To retrieve the first page of results omit the parameter."
-                        " To retrieve next page, use the lowest id value from previous page")
+            " To retrieve the first page of results omit the parameter."
+            " To retrieve next page, use the lowest id value from previous page",
+        ),
     ] = None,
     limit: Annotated[
-        int, Query(description="Use limit parameter to set the size of returned page")] = 20,
+        int, Query(description="Use limit parameter to set the size of returned page")
+    ] = 20,
 ) -> list[schemas.Post]:
-    user_id = db_session.execute(select(models.User.id).where(models.User.user_name == user_name)).scalar()
+    user_id = db_session.execute(
+        select(models.User.id).where(models.User.user_name == user_name)
+    ).scalar()
     if not user_id:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"User with username {user_name} not found."
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with username {user_name} not found.",
         )
 
-    posts_query = select(models.Post).where(models.Post.user_id == user_id).order_by(models.Post.id.desc())
+    posts_query = (
+        select(models.Post)
+        .where(models.Post.user_id == user_id)
+        .order_by(models.Post.id.desc())
+    )
     if _id:
         posts_query = posts_query.where(_id > models.Post.id)
 
@@ -256,7 +295,12 @@ def get_user_posts(
 
     results = db_session.execute(posts_query).scalars()
     return [
-        schemas.Post(id=result.id, user_id=user_id, created_at=result.created_at, content=result.content)
+        schemas.Post(
+            id=result.id,
+            user_id=user_id,
+            created_at=result.created_at,
+            content=result.content,
+        )
         for result in results
     ]
 
@@ -270,15 +314,21 @@ def get_user_following(
         Query(
             alias="id",
             description="The id parameter is used for pagination."
-                        " To retrieve the first page of results omit the parameter."
-                        " To retrieve next page, use the lowest id value from previous page")
+            " To retrieve the first page of results omit the parameter."
+            " To retrieve next page, use the lowest id value from previous page",
+        ),
     ] = None,
-    limit: Annotated[int, Query(description="Use limit parameter to set the size of returned page")] = 20
+    limit: Annotated[
+        int, Query(description="Use limit parameter to set the size of returned page")
+    ] = 20,
 ):
-    user_id = db_session.execute(select(models.User.id).where(models.User.user_name == user_name)).scalar()
+    user_id = db_session.execute(
+        select(models.User.id).where(models.User.user_name == user_name)
+    ).scalar()
     if not user_id:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"User with username {user_name} not found."
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with username {user_name} not found.",
         )
 
     query = (
@@ -296,7 +346,10 @@ def get_user_following(
 
     results = db_session.execute(query).all()
     return [
-        schemas.UserFollow(user_name=result.user_name, id=result.id, created_at=result.created_at) for result in results
+        schemas.UserFollow(
+            user_name=result.user_name, id=result.id, created_at=result.created_at
+        )
+        for result in results
     ]
 
 
@@ -309,15 +362,21 @@ def get_user_followers(
         Query(
             alias="id",
             description="The id parameter is used for pagination."
-                        " To retrieve the first page of results omit the parameter."
-                        " To retrieve next page, use the lowest id value from previous page")
+            " To retrieve the first page of results omit the parameter."
+            " To retrieve next page, use the lowest id value from previous page",
+        ),
     ] = None,
-    limit: Annotated[int, Query(description="Use limit parameter to set the size of returned page")] = 20
+    limit: Annotated[
+        int, Query(description="Use limit parameter to set the size of returned page")
+    ] = 20,
 ):
-    user_id = db_session.execute(select(models.User.id).where(models.User.user_name == user_name)).scalar()
+    user_id = db_session.execute(
+        select(models.User.id).where(models.User.user_name == user_name)
+    ).scalar()
     if not user_id:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"User with username {user_name} not found."
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with username {user_name} not found.",
         )
 
     query = (
@@ -335,5 +394,8 @@ def get_user_followers(
 
     results = db_session.execute(query).all()
     return [
-        schemas.UserFollow(user_name=result.user_name, id=result.id, created_at=result.created_at) for result in results
+        schemas.UserFollow(
+            user_name=result.user_name, id=result.id, created_at=result.created_at
+        )
+        for result in results
     ]
