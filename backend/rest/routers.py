@@ -156,7 +156,7 @@ def unfollow_user(
     )
 
     db_session.commit()
-    if not delete_result.rowcount:
+    if not delete_result:  # type: ignore # https://github.com/sqlalchemy/sqlalchemy/issues/9377
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"User {current_user.user_name} does not follow {user_name}.",
@@ -181,7 +181,7 @@ def get_posts_from_followers(
     ] = 20,
 ) -> list[schemas.PostWithUserDetails]:
     current_user = get_current_user(token, db_session)
-    user_alias: models.User = aliased(models.User)
+    user_alias = aliased(models.User)
     query = (
         select(
             models.Post.id,
@@ -222,10 +222,10 @@ def get_user(
     db_session: Session = Depends(get_database_session),
 ) -> schemas.UserWithDetails:
     current_user = get_current_user(token, db_session)
-    user = db_session.execute(
+    user_result = db_session.execute(
         select(models.User).where(models.User.user_name == user_name)
     ).scalar()
-    if not user:
+    if not user_result:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"User with username {user_name} not found.",
@@ -234,23 +234,23 @@ def get_user(
     follow = db_session.execute(
         select(models.Follow)
         .where(models.Follow.follower_id == current_user.id)
-        .where(models.Follow.followee_id == user.id)
+        .where(models.Follow.followee_id == user_result.id)
     ).scalar()
 
     followers_count = db_session.execute(
-        select(func.count()).where(models.Follow.followee_id == user.id)
+        select(func.count()).where(models.Follow.followee_id == user_result.id)
     ).scalar()
     following_count = db_session.execute(
-        select(func.count()).where(models.Follow.follower_id == user.id)
+        select(func.count()).where(models.Follow.follower_id == user_result.id)
     ).scalar()
 
     user = schemas.UserWithDetails(
-        id=user.id,
-        userName=user.user_name,
-        created_at=user.created_at,
+        id=user_result.id,
+        user_name=user_result.user_name,
+        created_at=user_result.created_at,
         is_following=True if follow else False,
-        follower_count=followers_count,
-        following_count=following_count,
+        follower_count=followers_count if followers_count else 0,
+        following_count=following_count if following_count else 0,
     )
 
     return user

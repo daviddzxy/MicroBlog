@@ -13,9 +13,12 @@ passlib = "==1.7.4"
 python-multipart = "==0.0.6"
 fastapi = "==0.104.0"
 pydantic = "==2.4.2"
+types-passlib = "==1.7.4"
 
 [dev-packages]
 ruff = "==0.1.5"
+mypy = "==1.7.0"
+types-python-jose = "==3.3.0"
 
 [requires]
 python_version = "3.11"

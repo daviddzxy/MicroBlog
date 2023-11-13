@@ -51,7 +51,7 @@ class PostWithUserDetails(Post):
 class Token(BaseModel):
     # OAuth's specification requires snake_case form, do not use camelCase alias
     access_token: str
-    token_type: str = Field("bearer")
+    token_type: str = Field(default="bearer")
 
 
 class TokenData(BaseModel):
