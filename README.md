@@ -1,13 +1,4 @@
-## Functional Backlog
-- Implement user search feature (backend&frontend)
-- Implement comment post feature (backend&frontend)
-- Implement form validation (frontend)
-- Implement error pages (frontend)
-- Implement repost feature (backend&frontend)
+Trying out React + Fast API + Tailwind. 
 
-## Non-functional Backlog
-- Refactor frontend - Extract code into reusable components(Button, FormField, Form ...)
-- Set up Ruff nad Mypy
-- Make frontend dockerfile
-- Make startup(build) script, which starts both backend and frontend
-- Make custom auth hook
+
+Go + Redis + Websockets for notifications next.
